@@ -54,19 +54,98 @@
     <button>Console Trace</button>
     <button>Trigger a Global Error</button>
   </section>
-
+  <script src="https://cdn.trackjs.com/agent/v3/latest/t.js"></script>
   <script>
+    window.TrackJS && TrackJS.install({ 
+      token: "17f191420aec474e94a5dc7f09e6e188"
+      // for more configuration options, see https://docs.trackjs.com
+    });
+  </script>
+  <script>
+    window.onerror = function(message, source, lineno, colno, error) {
+       console.log("ohh no", error);
+       TrackJS.track(message);
+      };
+
+    class TooBigError extends Error {
+      constructor(message){
+        super(message);
+        this.name = 'TooBigError';
+      }
+    }
+    
     let calculateBtn = document.querySelector('#calculate');
     calculateBtn.addEventListener('click', () => {
-      let output = document.querySelector('output');
-      let firstNum = document.querySelector('#first-num').value;
-      let secondNum = document.querySelector('#second-num').value;
-      let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      try{
+        let output = document.querySelector('output');
+        let firstNum = document.querySelector('#first-num').value;
+        let secondNum = document.querySelector('#second-num').value;
+        if (Number(secondNum)>10){
+          throw new TooBigError(secondNum);
+        }
+        let operator = document.querySelector('#operator').value;
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      }
+      catch (err){
+        console.log("Caught", err);
+      }
+      finally{
+        console.log("finish")
+      }
     });
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
     // TODO - Make buttons functional
+    errorBtns[0].addEventListener('click', ()=>{
+      console.log('hi');
+    });
+    errorBtns[1].addEventListener('click', ()=>{
+      console.error('Oh noo');
+    });
+    errorBtns[2].addEventListener('click', ()=>{
+      console.dir(document.location);
+    });
+    errorBtns[3].addEventListener('click', ()=>{
+      console.dirxml(document.location);
+    });
+    errorBtns[4].addEventListener('click', ()=>{
+      console.group();
+      console.log('hi');
+    });
+    errorBtns[5].addEventListener('click', ()=>{
+      console.groupEnd();
+    });
+    errorBtns[6].addEventListener('click', ()=>{
+      console.table([{
+        name: "Tim", 
+        job: "student"
+      },
+      {
+        name: "John",
+        job: "Test"
+      }]);
+    });
+    errorBtns[7].addEventListener('click', ()=>{
+      console.time('timer');
+    });
+    errorBtns[8].addEventListener('click', ()=>{
+      console.timeEnd('timer');
+    });
+    errorBtns[9].addEventListener('click', ()=>{
+      function myFunc(){
+        myOtherFunc();
+      }
+      function myOtherFunc(){
+        console.trace();
+      }
+      myFunc();
+    });
+    errorBtns[10].addEventListener('click', ()=>{
+      throw "This is an error";
+    });
+    throw new TooBigError(2);
   </script>
+  
+                          
 </body>
 </html>
